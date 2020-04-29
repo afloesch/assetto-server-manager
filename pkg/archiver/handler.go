@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	log "github.com/sirupsen/logrus"
 )
 
 // Handler is the http handler for requests to /download
@@ -12,7 +13,10 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 
 	if Archive == nil {
 		w.WriteHeader(404)
-		w.Write([]byte("not found"))
+		_, err := w.Write([]byte("not found"))
+		if err != nil {
+			log.Error(err)
+		}
 		return
 	}
 
@@ -33,21 +37,30 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 
 		buf := bytes.NewBuffer(cached)
-		buf.WriteTo(w)
+		_, err := buf.WriteTo(w)
+		if err != nil {
+			log.Error(err)
+		}
 		return
 	}
 
 	exists := a.AssetExists(assettype, name)
 	if !exists {
 		w.WriteHeader(404)
-		w.Write([]byte("not found"))
+		_, err := w.Write([]byte("not found"))
+		if err != nil {
+			log.Error(err)
+		}
 		return
 	}
 
 	err := a.Create(assettype, name)
 	if err != nil {
 		w.WriteHeader(500)
-		w.Write([]byte("service error"))
+		_, err := w.Write([]byte("service error"))
+		if err != nil {
+			log.Error(err)
+		}
 		return
 	}
 
@@ -56,6 +69,8 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 
 	buf := bytes.NewBuffer(cached)
-	buf.WriteTo(w)
-	return
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		log.Error(err)
+	}
 }

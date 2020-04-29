@@ -74,14 +74,14 @@ func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
 
 	// unmarshal the json
 	var j map[string]interface{}
-	err = json.Unmarshal([]byte(data), &j)
+	err = json.Unmarshal(data, &j)
 	if err != nil {
 		return err
 	}
 
 	// check if asset author is in blacklist
 	blacklisted := a.isAuthorBlacklisted(fmt.Sprintf("%v", j["author"]))
-	if blacklisted == true {
+	if blacklisted {
 		return nil
 	}
 
@@ -120,7 +120,7 @@ func (a *Archiver) SetAssetDownloadURL(c assetType) []error {
 	}
 
 	for _, t := range items {
-		a.setDownloadURL(t, c)
+		err := a.setDownloadURL(t, c)
 		if err != nil {
 			errs = append(errs, err)
 		}
