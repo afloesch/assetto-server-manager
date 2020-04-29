@@ -64,6 +64,11 @@ func main() {
 
 	servermanager.Changelog = changes
 
+	// init the archiver package with the config values if it is enabled
+	if config.Server.AssetDownloads {
+		_ = archiver.New(config.Steam.InstallPath, config.Server.AssetCacheDir, config.HTTP.BaseURL, config.Server.AssetAuthorBlacklist, config.Server.OverwriteExistingAssetURL)
+	}
+
 	var templateLoader servermanager.TemplateLoader
 	var filesystem http.FileSystem
 
@@ -133,11 +138,6 @@ func main() {
 		defer servermanager.Lua.Close()
 
 		servermanager.InitLua(resolver.ResolveRaceControl())
-	}
-
-	// init the archiver package with the config values if it is enabled
-	if config.Server.AssetDownloads {
-		_ = archiver.New(config.Steam.InstallPath, config.Server.AssetCacheDir, config.HTTP.BaseURL, config.Server.AssetAuthorBlacklist, config.Server.OverwriteExistingAssetURL)
 	}
 
 	err = servermanager.InitWithResolver(resolver)
