@@ -39,7 +39,7 @@ func New(acServerPath string, cachePath string, domain string, authorsBlacklist 
 	errs := Archive.SetAssetDownloadURLs()
 
 	if len(errs) > 0 {
-		log.Error(errs)
+		log.Warn(errs)
 	}
 
 	return Archive
@@ -185,11 +185,25 @@ func (a *Archiver) AssetExists(assetType assetType, assetName string) bool {
 // directory structure inside the zip for Content Manager to automatically install it
 func (a *Archiver) Create(assetType assetType, name string) error {
 
-	assetpath := filepath.Join(assetType.Folder(), name)
-	bundlepath := filepath.Join(a.CachePath, assetType.Name(), name)
+	var cachepath string
 
-	// Make sure the a.CachePath and asset directory exist
-	err := os.MkdirAll(filepath.Join(a.CachePath, assetType.Name()), 0666)
+	if filepath.IsAbs(a.CachePath) {
+		cachepath = a.CachePath
+	} else {
+		dir, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		cachepath = filepath.Join(dir, a.CachePath)
+	}
+
+	log.Info("CachePath !!!! " + cachepath)
+
+	assetpath := filepath.Join(assetType.Folder(), name)
+	bundlepath := filepath.Join(cachepath, assetType.Name(), name)
+
+	// Make sure the cachepath and asset directory exist
+	err := os.MkdirAll(filepath.Join(cachepath, assetType.Name()), 0666)
 	if err != nil {
 		return err
 	}

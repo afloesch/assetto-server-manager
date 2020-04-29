@@ -9,6 +9,13 @@ import (
 
 // Handler is the http handler for requests to /download
 func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
+
+	if Archive == nil {
+		w.WriteHeader(404)
+		w.Write([]byte("not found"))
+		return
+	}
+
 	name := chi.URLParam(r, "name")
 	asset := chi.URLParam(r, "type")
 
