@@ -147,6 +147,10 @@ type ServerExtraConfig struct {
 	PerformanceMode             bool             `yaml:"performance_mode"`
 	DisableWindowsBrowserOpen   bool             `yaml:"dont_open_browser"`
 	ScanContentFolderForChanges bool             `yaml:"scan_content_folder_for_changes"`
+	AssetDownloads              bool             `yaml:"allow_asset_downloads"`
+	AssetCacheDir               string           `yaml:"cache_asset_archives"`
+	OverwriteExistingAssetURL   bool             `yaml:"overwrite_existing_asset_downloadurl"`
+	AssetAuthorBlacklist        []string         `yaml:"asset_author_blacklist"`
 
 	// Deprecated: use Plugins instead
 	RunOnStart []string `yaml:"run_on_start"`

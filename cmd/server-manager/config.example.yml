@@ -199,6 +199,25 @@ server:
   # each server manager instance can see added/removed cars as they change
   scan_content_folder_for_changes: false
 
+  # set this to 'true' if you want to serve missing cars or tracks to users with
+  # a download link in content manager.
+  allow_asset_downloads: false
+
+  # only works if allow_asset_downloads is enabled.
+  asset_cache_directory: assetto/content/bundle
+
+  # only works if allow_asset_downloads is enabled. Set to true if you want any
+  # existing downloadURL set in an asset to be updated with the new Assetto Server
+  # Manager URL.
+  overwrite_existing_asset_downloadurl: false
+
+  # only works if allow_asset_downloads is enabled. List of authors whose assets 
+  # are not to be served to users. We strongly recommend not serving Kunos cars 
+  # or tracks, and any other asset for which you do not have a license.
+  asset_author_blacklist:
+    - Kunos
+    #- Example second entry
+
   # list of commands to run on server start and kill on server stop. this should
   # contain the full command with arguments to run the given program.
   #

@@ -14,6 +14,7 @@ import (
 	"github.com/JustaPenguin/assetto-server-manager/cmd/server-manager/static"
 	"github.com/JustaPenguin/assetto-server-manager/cmd/server-manager/views"
 	"github.com/JustaPenguin/assetto-server-manager/internal/changelog"
+	"github.com/JustaPenguin/assetto-server-manager/pkg/archiver"
 	"github.com/JustaPenguin/assetto-server-manager/pkg/udp"
 
 	"github.com/dustin/go-humanize"
@@ -37,6 +38,10 @@ func init() {
 
 func main() {
 	config, err := servermanager.ReadConfig("config.yml")
+
+	logrus.WithFields(logrus.Fields{
+		"config": config,
+	}).Info("got config")
 
 	if err != nil {
 		ServeHTTPWithError(defaultAddress, "Read configuration file (config.yml)", err)
@@ -133,6 +138,9 @@ func main() {
 
 		servermanager.InitLua(resolver.ResolveRaceControl())
 	}
+
+	// init the archiver package with the config values
+	_ = archiver.New(config.Steam.InstallPath, config.Server.AssetCacheDir, config.HTTP.BaseURL, config.Server.AssetAuthorBlacklist, config.Server.OverwriteExistingAssetURL)
 
 	err = servermanager.InitWithResolver(resolver)
 

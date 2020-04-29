@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/JustaPenguin/assetto-server-manager/pkg/archiver"
 	"github.com/cj123/sessions"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -78,6 +79,7 @@ func Router(
 	r.HandleFunc("/robots.txt", serverAdministrationHandler.robots)
 	r.Handle("/metrics", prometheusMonitoringHandler())
 	r.Get("/healthcheck.json", healthCheck.ServeHTTP)
+	r.Get("/download/{type:cars|tracks}/{name}", archiver.Archive.Handler)
 
 	if Debug {
 		r.Mount("/debug/", middleware.Profiler())
