@@ -197,8 +197,6 @@ func (a *Archiver) Create(assetType assetType, name string) error {
 		cachepath = filepath.Join(dir, a.CachePath)
 	}
 
-	log.Info("CachePath !!!! " + cachepath)
-
 	assetpath := filepath.Join(assetType.Folder(), name)
 	bundlepath := filepath.Join(cachepath, assetType.Name(), name)
 
