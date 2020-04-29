@@ -3,7 +3,7 @@ server-install
 docker-compose.yml
 cmd/championship-import
 server-manager.log
-server_manager.db
+server-manager.db
 config.yml
 assetto/
 
