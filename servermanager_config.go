@@ -148,7 +148,7 @@ type ServerExtraConfig struct {
 	DisableWindowsBrowserOpen   bool             `yaml:"dont_open_browser"`
 	ScanContentFolderForChanges bool             `yaml:"scan_content_folder_for_changes"`
 	AssetDownloads              bool             `yaml:"allow_asset_downloads"`
-	AssetCacheDir               string           `yaml:"cache_asset_archives"`
+	AssetCacheDir               string           `yaml:"asset_cache_directory"`
 	OverwriteExistingAssetURL   bool             `yaml:"overwrite_existing_asset_downloadurl"`
 	AssetAuthorBlacklist        []string         `yaml:"asset_author_blacklist"`
 
