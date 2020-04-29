@@ -7,7 +7,7 @@ type assetType interface {
 	Name() string
 	// Folder returns the asset folder path relative to ac server install directory
 	Folder() string
-	// Data returns the path to the asset json file relative to the asset folder
+	// Data returns the glob pattern to the asset json file relative to the asset folder
 	Data() string
 }
 
@@ -24,7 +24,7 @@ func (c Car) Folder() string {
 	return "content/cars"
 }
 
-// Data returns the path to the asset json file
+// Data returns the glob pattern to the asset json file relative to the asset folder
 func (c Car) Data() string {
 	return "ui/ui_car.json"
 }
@@ -42,7 +42,7 @@ func (t Track) Folder() string {
 	return "content/tracks"
 }
 
-// Data returns the path to the asset json file
+// Data returns the glob pattern to the asset json file relative to the asset folder
 func (t Track) Data() string {
-	return "ui/ui_track.json"
+	return "ui/meta_data.json"
 }

@@ -2,6 +2,7 @@ package archiver
 
 import (
 	"archive/zip"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -63,14 +64,41 @@ func (a *Archiver) isAuthorBlacklisted(author string) bool {
 // asset whose author is not in the authorsBlacklist, and if overwriteURL is set to true when a download
 // URL is already set
 func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
+
 	// build the asset ui json file path
 	jsondatapath := filepath.Join(a.ACServerInstallPath, c.Folder(), dir.Name(), c.Data())
+
+	exists, _ := os.Stat(jsondatapath)
+	_, car := c.(Car)
+
+	// If the json file does not already exist and this isn't a car asset create it
+	if exists == nil && !car {
+
+		log.WithFields(log.Fields{
+			"file": jsondatapath,
+		}).Debug("creating asset data file")
+
+		// Make sure the directory path exists
+		err := os.MkdirAll(filepath.Join(a.ACServerInstallPath, c.Folder(), dir.Name()), 0666)
+		if err != nil {
+			return err
+		}
+
+		// create the json file
+		err = ioutil.WriteFile(jsondatapath, []byte("{}"), 0644)
+		if err != nil {
+			return err
+		}
+	}
 
 	// read the asset json data
 	data, err := ioutil.ReadFile(jsondatapath)
 	if err != nil {
 		return err
 	}
+
+	// trim out any BOM from the json file
+	data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 
 	// unmarshal the json
 	var j map[string]interface{}
@@ -80,18 +108,32 @@ func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
 	}
 
 	// check if asset author is in blacklist
-	blacklisted := a.isAuthorBlacklisted(fmt.Sprintf("%v", j["author"]))
-	if blacklisted {
-		return nil
+	if j["author"] != nil && j["author"] != "" {
+		blacklisted := a.isAuthorBlacklisted(fmt.Sprintf("%v", j["author"]))
+		if blacklisted {
+			log.WithFields(log.Fields{
+				"file": jsondatapath,
+			}).Debug("asset author blacklisted from asset downloads")
+			return nil
+		}
 	}
 
 	// check if a download URL is already set and if it should be overwritten
 	if !a.OverwriteURL && j["downloadURL"] != nil && j["downloadURL"] != "" {
+		log.WithFields(log.Fields{
+			"file": jsondatapath,
+		}).Debug("asset URL is already set")
 		return nil
 	}
 
 	// build the download URL. hard coding "download" as the service handler path
-	j["downloadURL"] = a.BaseDomain + "/download/" + c.Name() + "/" + url.QueryEscape(dir.Name())
+	url := a.BaseDomain + "/download/" + c.Name() + "/" + url.QueryEscape(dir.Name())
+	j["downloadURL"] = url
+
+	log.WithFields(log.Fields{
+		"file": jsondatapath,
+		"url":  url,
+	}).Debug("set asset download url")
 
 	// marshal the new asset data back to json pretty printed
 	updated, err := json.MarshalIndent(j, "", "  ")
@@ -110,17 +152,22 @@ func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
 
 // SetAssetDownloadURL walks the specified content type folder and updates the download
 // URLs for those assets
-func (a *Archiver) SetAssetDownloadURL(c assetType) []error {
+func (a *Archiver) SetAssetDownloadURL(t assetType) []error {
 	// store all errors encountered while processing files in a slice
 	var errs []error
 
-	items, err := ioutil.ReadDir(filepath.Join(a.ACServerInstallPath, c.Folder()))
+	items, err := ioutil.ReadDir(filepath.Join(a.ACServerInstallPath, t.Folder()))
 	if err != nil {
 		errs = append(errs, err)
 	}
 
-	for _, t := range items {
-		err := a.setDownloadURL(t, c)
+	for _, f := range items {
+
+		log.WithFields(log.Fields{
+			"folder": f.Name(),
+		}).Debug("parse asset folder")
+
+		err := a.setDownloadURL(f, t)
 		if err != nil {
 			errs = append(errs, err)
 		}
