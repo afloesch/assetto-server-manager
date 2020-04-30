@@ -24,6 +24,7 @@ type Configuration struct {
 	Monitoring    MonitoringConfig    `yaml:"monitoring"`
 	Championships ChampionshipsConfig `yaml:"championships"`
 	Lua           LuaConfig           `yaml:"lua"`
+	Archiver      ArchiverConfig      `yaml:"archiver"`
 }
 
 type ChampionshipsConfig struct {
@@ -147,13 +148,19 @@ type ServerExtraConfig struct {
 	PerformanceMode             bool             `yaml:"performance_mode"`
 	DisableWindowsBrowserOpen   bool             `yaml:"dont_open_browser"`
 	ScanContentFolderForChanges bool             `yaml:"scan_content_folder_for_changes"`
-	AssetDownloads              bool             `yaml:"allow_asset_downloads"`
-	AssetCacheDir               string           `yaml:"asset_cache_directory"`
-	OverwriteExistingAssetURL   bool             `yaml:"overwrite_existing_asset_downloadurl"`
-	AssetAuthorBlacklist        []string         `yaml:"asset_author_blacklist"`
 
 	// Deprecated: use Plugins instead
 	RunOnStart []string `yaml:"run_on_start"`
+}
+
+type ArchiverConfig struct {
+	Enabled                   bool     `yaml:"allow_asset_downloads"`
+	AssetCacheDir             string   `yaml:"asset_cache_directory"`
+	Host                      string   `yaml:"host"`
+	Path                      string   `yaml:"path"`
+	SetDownloadURL            bool     `yaml:"set_asset_download_url"`
+	OverwriteExistingAssetURL bool     `yaml:"overwrite_existing_asset_downloadurl"`
+	AssetAuthorBlacklist      []string `yaml:"asset_author_blacklist"`
 }
 
 type CommandPlugin struct {

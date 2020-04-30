@@ -64,9 +64,20 @@ func main() {
 
 	servermanager.Changelog = changes
 
-	// init the archiver package with the config values if it is enabled
-	if config.Server.AssetDownloads {
-		_ = archiver.New(config.Steam.InstallPath, config.Server.AssetCacheDir, config.HTTP.BaseURL, config.Server.AssetAuthorBlacklist, config.Server.OverwriteExistingAssetURL)
+	// init the archiver package with the config values
+	arc := archiver.New(config.Steam.InstallPath, config.Archiver.AssetCacheDir, config.Archiver.AssetAuthorBlacklist, config.Archiver.Enabled, config.Archiver.OverwriteExistingAssetURL)
+
+	if config.Archiver.SetDownloadURL {
+		var errs []error
+		errs = arc.SetAssetDownloadURLs(config.Archiver.Host + config.Archiver.Path)
+
+		if len(errs) > 0 {
+			for _, e := range errs {
+				logrus.WithFields(logrus.Fields{
+					"error": e,
+				}).Warn("failed to set asset download url")
+			}
+		}
 	}
 
 	var templateLoader servermanager.TemplateLoader

@@ -22,25 +22,19 @@ var Archive *Archiver
 type Archiver struct {
 	ACServerInstallPath string
 	AuthorsBlacklist    []string
-	BaseDomain          string // should be a valid hostname, for example http://www.google.com
 	CachePath           string
+	Enabled             bool
 	OverwriteURL        bool
 }
 
 // New returns an Archiver pointer
-func New(acServerPath string, cachePath string, domain string, authorsBlacklist []string, overwrite bool) *Archiver {
+func New(acServerPath string, cachePath string, authorsBlacklist []string, enabled bool, overwrite bool) *Archiver {
 	Archive = &Archiver{
 		ACServerInstallPath: acServerPath,
 		AuthorsBlacklist:    authorsBlacklist,
-		BaseDomain:          domain,
 		CachePath:           cachePath,
+		Enabled:             enabled,
 		OverwriteURL:        overwrite,
-	}
-
-	errs := Archive.SetAssetDownloadURLs()
-
-	if len(errs) > 0 {
-		log.Warn(errs)
 	}
 
 	return Archive
@@ -63,7 +57,7 @@ func (a *Archiver) isAuthorBlacklisted(author string) bool {
 // setDownloadURL reads an asset json file and sets an Assetto Server Manager download url for any
 // asset whose author is not in the authorsBlacklist, and if overwriteURL is set to true when a download
 // URL is already set
-func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
+func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType, baseurl string) error {
 
 	// build the asset ui json file path
 	jsondatapath := filepath.Join(a.ACServerInstallPath, c.Folder(), dir.Name(), c.Data())
@@ -127,7 +121,7 @@ func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
 	}
 
 	// build the download URL. hard coding "download" as the service handler path
-	url := a.BaseDomain + "/download/" + c.Name() + "/" + url.QueryEscape(dir.Name())
+	url := baseurl + "/" + c.Name() + "/" + url.QueryEscape(dir.Name()+".zip")
 	j["downloadURL"] = url
 
 	log.WithFields(log.Fields{
@@ -152,7 +146,7 @@ func (a *Archiver) setDownloadURL(dir os.FileInfo, c assetType) error {
 
 // SetAssetDownloadURL walks the specified content type folder and updates the download
 // URLs for those assets
-func (a *Archiver) SetAssetDownloadURL(t assetType) []error {
+func (a *Archiver) SetAssetDownloadURL(t assetType, url string) []error {
 	// store all errors encountered while processing files in a slice
 	var errs []error
 
@@ -167,7 +161,7 @@ func (a *Archiver) SetAssetDownloadURL(t assetType) []error {
 			"folder": f.Name(),
 		}).Debug("parse asset folder")
 
-		err := a.setDownloadURL(f, t)
+		err := a.setDownloadURL(f, t, url)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -178,20 +172,20 @@ func (a *Archiver) SetAssetDownloadURL(t assetType) []error {
 
 // SetAssetDownloadURLs walks all the defined contentType folders and sets the Assetto Server Manager
 // download URL for all assets
-func (a *Archiver) SetAssetDownloadURLs() []error {
+func (a *Archiver) SetAssetDownloadURLs(url string) []error {
 	// store all errors encountered while processing files in a slice
 	var errs []error
 
 	log.Debug("set cars download URLs")
 
-	err := a.SetAssetDownloadURL(Car{})
+	err := a.SetAssetDownloadURL(Car{}, url)
 	if err != nil {
 		errs = append(errs, err...)
 	}
 
 	log.Debug("set tracks download URLs")
 
-	err = a.SetAssetDownloadURL(Track{})
+	err = a.SetAssetDownloadURL(Track{}, url)
 	if err != nil {
 		errs = append(errs, err...)
 	}

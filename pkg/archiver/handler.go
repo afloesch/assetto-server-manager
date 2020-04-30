@@ -3,6 +3,7 @@ package archiver
 import (
 	"bytes"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,9 @@ import (
 // Handler is the http handler for requests to /download
 func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 
-	if Archive == nil {
+	log.Info(a.Enabled)
+
+	if a.Enabled == false {
 		w.WriteHeader(404)
 		_, err := w.Write([]byte("not found"))
 		if err != nil {
@@ -20,7 +23,7 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := chi.URLParam(r, "name")
+	name := strings.Replace(chi.URLParam(r, "name"), ".zip", "", 1)
 	asset := chi.URLParam(r, "type")
 
 	var assettype assetType
@@ -31,6 +34,7 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 		assettype = Car{}
 	}
 
+	log.Debug("search cache")
 	cached := a.GetCached(assettype, name)
 	if cached != nil {
 		w.Header().Set("Content-type", "application/zip")
