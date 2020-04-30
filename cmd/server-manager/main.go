@@ -68,8 +68,7 @@ func main() {
 	arc := archiver.New(config.Steam.InstallPath, config.Archiver.AssetCacheDir, config.Archiver.AssetAuthorBlacklist, config.Archiver.Enabled, config.Archiver.OverwriteExistingAssetURL)
 
 	if config.Archiver.SetDownloadURL {
-		var errs []error
-		errs = arc.SetAssetDownloadURLs(config.Archiver.Host + config.Archiver.Path)
+		errs := arc.SetAssetDownloadURLs(config.Archiver.Host + config.Archiver.Path)
 
 		if len(errs) > 0 {
 			for _, e := range errs {

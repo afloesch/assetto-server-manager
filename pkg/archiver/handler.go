@@ -15,7 +15,7 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Info(a.Enabled)
 
-	if a.Enabled == false {
+	if !a.Enabled {
 		w.WriteHeader(404)
 		_, err := w.Write([]byte("not found"))
 		if err != nil {
