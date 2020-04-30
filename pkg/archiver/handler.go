@@ -3,6 +3,7 @@ package archiver
 import (
 	"bytes"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi"
@@ -37,6 +38,9 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 	log.Debug("search cache")
 	cached := a.GetCached(assettype, name)
 	if cached != nil {
+		size := len(cached)
+
+		w.Header().Set("Content-Length", strconv.Itoa(size))
 		w.Header().Set("Content-type", "application/zip")
 		w.WriteHeader(200)
 
@@ -69,6 +73,9 @@ func (a *Archiver) Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cached = a.GetCached(assettype, name)
+	size := len(cached)
+
+	w.Header().Set("Content-Length", strconv.Itoa(size))
 	w.Header().Set("Content-type", "application/zip")
 	w.WriteHeader(200)
 
