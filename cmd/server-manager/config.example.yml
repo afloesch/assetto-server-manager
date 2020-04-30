@@ -280,7 +280,7 @@ archiver:
   # host settings for asset downloads. Change this to your external domain for
   # assetto server manager if allow_asset_downloads is set to true, or use a different
   # host if already hosted elsewhere.
-  host: http://localhost:8772
+  host:
 
   # if you are using assetto server manager to host the downloads then leave this 
   # set as is. For a different host you may need to change the path.
